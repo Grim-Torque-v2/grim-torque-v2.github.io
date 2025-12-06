@@ -3,131 +3,192 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grim-Torque Ai Image Generator</title>
+  <title>Grim-Torque Ai v2 Image Generator</title>
+
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background: rgb(51, 51, 51);
+      background: #000 !important; /* full black background */
     }
     iframe {
       border: none;
       width: 100%;
       height: 100%;
     }
-  </style>
-</head>
-<body>
-  <!-- Realtime clock - paste into your mobile check-in page body -->
-<div id="realtime-clock" aria-live="polite">
-  <div class="clock-time" id="clockTime">--:--</div>
-  <div class="clock-date" id="clockDate">Loading date...</div>
-</div>
 
-<style>
-  /* Mobile-friendly clock styles */
-  #realtime-clock{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    padding:10px 14px;
-    border-radius:14px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-    background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(250,250,250,0.5));
-    width: min(92%, 420px);
-    max-width: 420px;
-    margin: 10px auto;
-    -webkit-font-smoothing:antialiased;
-  }
+    /* --------------------- CLOCK STYLING --------------------- */
 
-  .clock-time{
-    font-size: clamp(28px, 9vw, 56px);
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    line-height:1;
-  }
+    /* CLOCK CONTAINER */
+    #realtime-clock{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:14px 18px;
+      border-radius:14px;
+      background: #000;
+      width: min(92%, 420px);
+      max-width: 420px;
+      margin: 10px auto;
+      -webkit-font-smoothing: antialiased;
+      color: #fff;
 
-  .clock-time .ampm{
-    font-size: 0.42em;
-    font-weight:600;
-    margin-left:8px;
-    vertical-align:middle;
-  }
+      /* Red glow */
+      text-shadow:
+        0 0 6px rgba(255,0,0,0.75),
+        0 0 14px rgba(255,0,0,0.55),
+        0 0 28px rgba(255,0,0,0.35);
 
-  .clock-date{
-    font-size: clamp(12px, 3.6vw, 16px);
-    color: #444;
-    font-weight:500;
-  }
-
-  /* Optional: make the seconds smaller and less prominent */
-  .clock-time .secs{
-    font-size: 0.55em;
-    opacity:0.7;
-    margin-left:6px;
-  }
-
-  /* Responsive touch: slightly bigger for touch targets on small phones */
-  @media (max-width:420px){
-    #realtime-clock { padding:12px; border-radius:12px; }
-    .clock-time { font-weight:700; }
-  }
-</style>
-
-<script>
-  (function(){
-    // CONFIG: set format here
-    const use24Hour = false; // set true for 24-hour format, false for 12-hour with AM/PM
-    const showSeconds = true; // set false to hide seconds
-
-    const elTime = document.getElementById('clockTime');
-    const elDate = document.getElementById('clockDate');
-
-    function pad(n){ return n < 10 ? '0' + n : n; }
-
-    function updateClock(){
-      const now = new Date();
-      let hours = now.getHours();
-      const mins = pad(now.getMinutes());
-      const secs = pad(now.getSeconds());
-
-      let ampm = '';
-      if(!use24Hour){
-        ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        if(hours === 0) hours = 12;
-      } else {
-        hours = pad(hours);
-      }
-
-      const secondsPart = showSeconds ? `<span class="secs">:${secs}</span>` : '';
-
-      // Build time string: big hours:minutes, small seconds, small AM/PM
-      elTime.innerHTML = `${hours}:${mins}${secondsPart}` + (!use24Hour ? `<span class="ampm">${ampm}</span>` : '');
-
-      // Date: Weekday, DD Mon YYYY -> e.g. Monday, 6 Oct 2025
-      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const dayName = days[now.getDay()];
-      const dayNum = now.getDate();
-      const monthName = months[now.getMonth()];
-      const year = now.getFullYear();
-      elDate.textContent = `${dayName}, ${dayNum} ${monthName} ${year}`;
+      /* Hologram shimmer */
+      position: relative;
+      overflow: hidden;
     }
 
-    // First run
-    updateClock();
-    // Update every second (1s)
-    setInterval(updateClock, 1000);
-  })();
-</script>
+    /* SCANLINES */
+    #realtime-clock::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,0,0,0.06) 0px,
+        rgba(255,0,0,0.06) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      pointer-events: none;
+    }
 
- 
-  <!-- Iframe loading your real app -->
+    /* HOLOGRAM GLOW LAYER */
+    #realtime-clock::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      mix-blend-mode: screen;
+      background: rgba(255,0,0,0.15);
+      animation: hologram-glow 3.2s infinite ease-in-out;
+      pointer-events: none;
+    }
+
+    @keyframes hologram-glow {
+      0%, 100% { opacity: 0.1; transform: translateX(0); }
+      20%      { opacity: 0.18; transform: translateX(-1px); }
+      40%      { opacity: 0.08; transform: translateX(1px); }
+      60%      { opacity: 0.22; transform: translateX(-2px); }
+      80%      { opacity: 0.1; transform: translateX(0); }
+    }
+
+    /* MAIN TIME */
+    .clock-time{
+      font-size: clamp(28px, 9vw, 56px);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height:1;
+      position: relative;
+
+      /* glitch movement */
+      animation: glitch-skew 2.8s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-skew {
+      0%   { transform: skew(0deg); }
+      20%  { transform: skew(1deg); }
+      25%  { transform: skew(-1deg); }
+      40%  { transform: skew(0.5deg); }
+      45%  { transform: skew(-0.5deg); }
+      60%  { transform: skew(0deg); }
+      80%  { transform: skew(1.2deg); }
+      100% { transform: skew(0deg); }
+    }
+
+    /* AM/PM */
+    .clock-time .ampm{
+      font-size: 0.42em;
+      font-weight:600;
+      margin-left:8px;
+      vertical-align:middle;
+      opacity: 0.9;
+    }
+
+    /* SECONDS */
+    .clock-time .secs{
+      font-size: 0.55em;
+      margin-left:6px;
+      opacity:0.85;
+    }
+
+    /* DATE */
+    .clock-date{
+      font-size: clamp(12px, 3.6vw, 16px);
+      font-weight:500;
+      opacity: 0.85;
+    }
+
+    /* MOBILE */
+    @media (max-width:420px){
+      #realtime-clock { padding:12px; border-radius:12px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CLOCK -->
+  <div id="realtime-clock" aria-live="polite">
+    <div class="clock-time" id="clockTime">--:--</div>
+    <div class="clock-date" id="clockDate">Loading date...</div>
+  </div>
+
+  <!-- CLOCK SCRIPT -->
+  <script>
+    (function(){
+      const use24Hour = false; 
+      const showSeconds = true;
+
+      const elTime = document.getElementById('clockTime');
+      const elDate = document.getElementById('clockDate');
+
+      function pad(n){ return n < 10 ? '0' + n : n; }
+
+      function updateClock(){
+        const now = new Date();
+        let hours = now.getHours();
+        const mins = pad(now.getMinutes());
+        const secs = pad(now.getSeconds());
+
+        let ampm = '';
+        if(!use24Hour){
+          ampm = hours >= 12 ? 'PM' : 'AM';
+          hours = hours % 12;
+          if(hours === 0) hours = 12;
+        } else {
+          hours = pad(hours);
+        }
+
+        const secondsPart = showSeconds ? `<span class="secs">:${secs}</span>` : '';
+
+        elTime.innerHTML =
+          `${hours}:${mins}${secondsPart}` +
+          (!use24Hour ? `<span class="ampm">${ampm}</span>` : '');
+
+        const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+        elDate.textContent =
+          `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+    })();
+  </script>
+
+  <!-- YOUR APP IFRAME -->
   <iframe src="https://multi-modal-ai-image-j3zozu0s.sites.blink.new"></iframe>
+
 </body>
 </html>
