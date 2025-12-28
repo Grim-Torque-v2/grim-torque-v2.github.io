@@ -15,7 +15,9 @@ html, body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Status bar */
+/* =====================
+   STATUS BAR
+===================== */
 #system-status {
   position: fixed;
   top: 0;
@@ -32,7 +34,9 @@ html, body {
 .offline { color: #ff5252; }
 .warning { color: #ffb300; }
 
-/* Iframe */
+/* =====================
+   IFRAME
+===================== */
 iframe {
   border: none;
   width: 100%;
@@ -40,44 +44,49 @@ iframe {
   margin-top: 30px;
 }
 
-/* Realtime clock */
-#realtime-clock{
+/* =====================
+   REALTIME CLOCK
+===================== */
+#realtime-clock {
   position: fixed;
   top: 36px;
   left: 50%;
   transform: translateX(-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  padding:10px 14px;
-  border-radius:14px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-  background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(250,250,250,0.5));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.55),
+    rgba(250,250,250,0.55)
+  );
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
   width: min(92%, 420px);
   z-index: 9998;
 }
 
-.clock-time{
+.clock-time {
   font-size: clamp(28px, 9vw, 56px);
   font-weight: 700;
-  line-height:1;
+  line-height: 1;
 }
 
-.clock-time .secs{
+.clock-time .secs {
   font-size: 0.55em;
-  opacity:0.7;
+  opacity: 0.7;
 }
 
-.clock-time .ampm{
+.clock-time .ampm {
   font-size: 0.42em;
   margin-left: 8px;
 }
 
-.clock-date{
+.clock-date {
   font-size: clamp(12px, 3.6vw, 16px);
-  color: #444;
+  color: #333;
 }
 </style>
 </head>
@@ -91,9 +100,9 @@ iframe {
 </div>
 
 <!-- REALTIME CLOCK -->
-<div id="realtime-clock" aria-live="polite">
+<div id="realtime-clock">
   <div class="clock-time" id="clockTime">--:--</div>
-  <div class="clock-date" id="clockDate">Loading date...</div>
+  <div class="clock-date" id="clockDate">Loading date…</div>
 </div>
 
 <!-- MAIN APP -->
@@ -104,15 +113,16 @@ iframe {
 </iframe>
 
 <script>
-(function(){
+(() => {
 
 /* =====================
-   USER / DEVICE DETECT
+   USER / DEVICE INFO
 ===================== */
 const userInfo = document.getElementById("userInfo");
 const ua = navigator.userAgent;
 const platform = navigator.platform || "Unknown OS";
 const isMobile = /Android|iPhone|iPad/i.test(ua);
+
 const browser =
   ua.includes("Chrome") ? "Chrome" :
   ua.includes("Firefox") ? "Firefox" :
@@ -125,7 +135,13 @@ userInfo.textContent = `${browser} • ${platform} • ${isMobile ? "Mobile" : "
    NETWORK STATUS
 ===================== */
 const netStatus = document.getElementById("netStatus");
-const iframe = document.getElementById("attendanceApp");
+const iframe = document.getElementById("grim-torqueApp");
+
+if (!iframe) {
+  netStatus.textContent = "❌ App frame missing";
+  netStatus.className = "offline";
+  return;
+}
 
 function updateNetworkStatus() {
   if (navigator.onLine) {
@@ -152,42 +168,48 @@ let iframeLoaded = false;
 
 iframe.onload = () => {
   iframeLoaded = true;
+  netStatus.textContent = "● App connected";
+  netStatus.className = "online";
 };
 
 setTimeout(() => {
   if (!iframeLoaded) {
-    netStatus.textContent = "⚠ App not responding (Server / DB / Network issue)";
+    netStatus.textContent = "⚠ App not responding (Server / Network)";
     netStatus.className = "warning";
   }
 }, 15000);
 
 function reloadIframe() {
   iframeLoaded = false;
-  iframe.src = iframe.src;
+  iframe.src = iframe.src.split("?")[0] + "?t=" + Date.now();
 }
 
 /* =====================
    REALTIME CLOCK
 ===================== */
-const elTime = document.getElementById('clockTime');
-const elDate = document.getElementById('clockDate');
+const elTime = document.getElementById("clockTime");
+const elDate = document.getElementById("clockDate");
 
-function pad(n){ return n < 10 ? '0' + n : n; }
+function pad(n) {
+  return n < 10 ? "0" + n : n;
+}
 
-function updateClock(){
+function updateClock() {
   const now = new Date();
+
   let hours = now.getHours();
   const mins = pad(now.getMinutes());
   const secs = pad(now.getSeconds());
 
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
 
-  elTime.innerHTML = `${hours}:${mins}<span class="secs">:${secs}</span><span class="ampm">${ampm}</span>`;
+  elTime.innerHTML =
+    `${hours}:${mins}<span class="secs">:${secs}</span>` +
+    `<span class="ampm">${ampm}</span>`;
 
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   elDate.textContent =
     `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
@@ -197,11 +219,11 @@ updateClock();
 setInterval(updateClock, 1000);
 
 /* =====================
-   OPTIONAL MESSAGE FROM APP
+   OPTIONAL APP MESSAGES
 ===================== */
 window.addEventListener("message", (e) => {
   if (e.data === "DB_ERROR") {
-    netStatus.textContent = "❌ Database error detected";
+    netStatus.textContent = "❌ Database error";
     netStatus.className = "offline";
   }
   if (e.data === "APP_READY") {
